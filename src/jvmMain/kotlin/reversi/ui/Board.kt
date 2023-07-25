@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.*
 import pt.isel.tds.reversi.model.*
 import pt.isel.tds.view.Sprites
+import reversi.ui.ReversiInitialMenu
 
 // Dimensions of the board presentation.
 val cellSize = 64.dp
@@ -37,52 +38,56 @@ fun BoardView(
     targetsOn: Boolean = false,
     canPlay: (Cell) -> Boolean,
     toFlip: (Cell) -> Boolean,
+    onNewGame: (String, Player) -> Unit,
     onClick: (Cell) -> Unit
 ) {
-    var delayTargets by remember(board){mutableStateOf(false) }
-    if (!delayTargets && targetsOn) {
-        LaunchedEffect(delayTargets) {
-            delay(1000)
-            delayTargets = true
-        }
-    }
-    Row(
-        modifier = Modifier.width(boardSize).background(Color.DarkGray),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Spacer(Modifier.size(subTitleSize))
-        repeat(BOARD_DIM) {
-            Box(Modifier.width(cellSize).height(subTitleSize), contentAlignment = Alignment.Center) {
-                Text("${'A' + it}", color = Color.White, textAlign = TextAlign.Center)
+    if (board == null) print("Board is null")//ReversiInitialMenu(onNewGame)
+    else {
+        var delayTargets by remember(board) { mutableStateOf(false) }
+        if (!delayTargets && targetsOn) {
+            LaunchedEffect(delayTargets) {
+                delay(1000)
+                delayTargets = true
             }
         }
-    }
-    Column(
-        modifier = Modifier.width(boardSize).background(Color.Black),
-        verticalArrangement = Arrangement.SpaceBetween,
-    ) {
-        repeat(BOARD_DIM) { row ->
-            if (row > 0) Spacer(Modifier.width(subTitleSize).height(lineSize).background(Color.DarkGray))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Box(
-                    Modifier.width(subTitleSize).height(cellSize).background(Color.DarkGray),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("${row + 1}", color = Color.White)
+        Row(
+            modifier = Modifier.width(boardSize).background(Color.DarkGray),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Spacer(Modifier.size(subTitleSize))
+            repeat(BOARD_DIM) {
+                Box(Modifier.width(cellSize).height(subTitleSize), contentAlignment = Alignment.Center) {
+                    Text("${'A' + it}", color = Color.White, textAlign = TextAlign.Center)
                 }
-                repeat(BOARD_DIM) { col ->
-                    if (col > 0) Spacer(Modifier.width(lineSize).height(cellSize).background(Color.Black))
-                    val pos = Cell(row, col)
-                    if (board == null) CellView(null)
-                    else CellView(board.moves[pos],
-                        // Dar flip se a posição já tinha lá peça e se a peça é diferente da que lá estava.
+            }
+        }
+        Column(
+            modifier = Modifier.width(boardSize).background(Color.Black),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            repeat(BOARD_DIM) { row ->
+                if (row > 0) Spacer(Modifier.width(subTitleSize).height(lineSize).background(Color.DarkGray))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Box(
+                        Modifier.width(subTitleSize).height(cellSize).background(Color.DarkGray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("${row + 1}", color = Color.White)
+                    }
+                    repeat(BOARD_DIM) { col ->
+                        if (col > 0) Spacer(Modifier.width(lineSize).height(cellSize).background(Color.Black))
+                        val pos = Cell(row, col)
+                        /*                    if (board == null) CellView(null)
+                    else*/ CellView(
+                        board.moves[pos],
                         toFlip = toFlip(pos),
-                        targets =  canPlay(pos) && delayTargets,
+                        targets = canPlay(pos) && delayTargets,
                         targetsOn = targetsOn,
                         onClick = { onClick(pos) })
+                    }
                 }
             }
         }
@@ -99,11 +104,9 @@ fun CellView(
     onClick: () -> Unit = {}
 ) {
     if (player == null) {
-
-        val modif = if (targets || !targetsOn) modifier.clickable(onClick = onClick) else modifier
-        Box(modifier = modif, contentAlignment = Alignment.Center) {
+        val mod = if (targets || !targetsOn) modifier.clickable(onClick = onClick) else modifier
+        Box(modifier = mod, contentAlignment = Alignment.Center) {
             if (targets) TargetView()
-
         }
     } else {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -129,4 +132,5 @@ fun CellView(
 @Composable
 fun TargetView() =
     Box(Modifier.clip(CircleShape).fillMaxSize(0.25f).background(Color.Yellow))
+
 

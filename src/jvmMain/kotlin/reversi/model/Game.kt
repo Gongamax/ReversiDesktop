@@ -1,7 +1,6 @@
 package pt.isel.tds.reversi.model
 
 import pt.isel.tds.reversi.storage.Storage
-import pt.isel.tds.storage.TextFileStorage
 
 typealias BoardStorage = Storage<String, Board>
 

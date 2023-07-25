@@ -78,27 +78,6 @@ fun Board.play(cell: Cell): Board {
 fun BoardRun.checkAvailablePlays() = Cell.values.firstOrNull { cell -> canPlay(cell) && !moves.contains(cell) }
 
 /**
- * Checks if it's a pass situation.
- * @return a BoardPass if it's a pass situation,
- * @throws IllegalStateException otherwise.
- */
-fun BoardRun.tryPass() = run {
-    val cap = checkAvailablePlays()
-    if (cap == null) BoardPass(moves, turn.other())
-    else throw IllegalStateException(("There is still available plays, $cap"))
-}
-
-/**
- * Checks if it's either a win or a draw when it's a double pass situation.
- * @return a BoardWin or a BoardDraw if it's a win or a draw situation respectively,
- */
-fun BoardPass.getResult(): Board {
-    val (blackPieces, whitePieces) = getScore()
-    return if (blackPieces == whitePieces) BoardDraw(moves)
-    else BoardWin(moves, if (blackPieces > whitePieces) Player.BLACK else Player.WHITE)
-}
-
-/**
  * Checks if the play in [cell] is a line of pieces of the current player, in any direction
  * If it is, it changes the pieces in the line to the current player.
  * @param cell the cell to check.
@@ -106,16 +85,15 @@ fun BoardPass.getResult(): Board {
 fun BoardRun.updatePieces(cell: Cell): Moves {
     val updatedMap = moves.plus(cell to turn).toMutableMap()
     Direction.values().forEach { dir ->
-        val cellsInDir = cellsInDirection(cell, dir)
-        if (cellsInDir.none { moves[it] == turn })
+        val cellsToFlip = cellsInDirection(cell, dir).takeWhile { moves[it] != null }
+        if (cellsToFlip.none { moves[it] == turn })
             return@forEach
-        for (c in cellsInDir) {
-            val player = moves[c] ?: return@forEach
-            if (player == turn.other()) updatedMap[c] = turn
+        for (c in cellsToFlip) {
+            if (moves[c] == turn.other()) updatedMap[c] = turn
             else return@forEach
         }
     }
-    return updatedMap.toMap()
+    return updatedMap
 }
 
 /**
@@ -127,8 +105,8 @@ fun BoardRun.canPlay(cell: Cell): Boolean =
     Direction.values().any { dir ->
         if (cell + dir !in moves.keys || moves[cell + dir] == turn) false
         else cellsInDirection(cell, dir)
-                .takeWhile { moves[it] != turn && moves[it] != null }
-                .all { moves[it] == turn.other() && moves[it + dir] != null }
+            .takeWhile { moves[it] != turn && moves[it] != null }
+            .all { moves[it] == turn.other() && moves[it + dir] != null }
     }
 
 /**
@@ -168,4 +146,25 @@ fun Board.passOrRunBoard(): Board {
     if (this is BoardPass) return getResult()
     if (this is BoardRun) return tryPass()
     else throw IllegalStateException("You cant pass, the game is not running")
+}
+
+/**
+ * Checks if it's a pass situation.
+ * @return a BoardPass if it's a pass situation,
+ * @throws IllegalStateException otherwise.
+ */
+private fun BoardRun.tryPass() = run {
+    val cap = checkAvailablePlays()
+    if (cap == null) BoardPass(moves, turn.other())
+    else throw IllegalStateException(("There is still available plays, $cap"))
+}
+
+/**
+ * Checks if it's either a win or a draw when it's a double pass situation.
+ * @return a BoardWin or a BoardDraw if it's a win or a draw situation respectively,
+ */
+private fun BoardPass.getResult(): Board {
+    val (blackPieces, whitePieces) = getScore()
+    return if (blackPieces == whitePieces) BoardDraw(moves)
+    else BoardWin(moves, if (blackPieces > whitePieces) Player.BLACK else Player.WHITE)
 }
