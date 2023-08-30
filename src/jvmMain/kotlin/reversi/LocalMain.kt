@@ -15,16 +15,12 @@ fun main() {
     val storage: BoardStorage = TextFileStorage("games", BoardSerializer)
     application(exitProcessOnExit = false) {
         val icon = painterResource("reversi.png")
-        Tray(
-            icon = icon,
-            menu = {
-                Item("Quit App", onClick = ::exitApplication)
-            })
         Window(
             onCloseRequest = ::exitApplication,
-            title = "TDS Reversi",
+            title = "Reversi Game",
             state = WindowState(size = DpSize.Unspecified),
-            icon = icon
+            icon = icon,
+            resizable = false
         ) {
             ReversiApp(::exitApplication, storage)
         }

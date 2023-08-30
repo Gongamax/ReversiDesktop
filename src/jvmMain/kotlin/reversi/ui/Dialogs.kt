@@ -7,6 +7,11 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogState
@@ -25,9 +30,12 @@ fun ReversiDialog(viewModel: ReversiViewModel): Unit =
     when (viewModel.open) {
         Dialog.NEW_GAME -> NewDialog(viewModel::closeDialog, viewModel::newGame, "New Game")
         Dialog.JOIN_GAME -> JoinDialog(viewModel::closeDialog, viewModel::joinGame, "Join Game")
-        Dialog.HELP -> HelpDialog(viewModel::closeDialog)
+        Dialog.MULTIPLAYER_OPTION -> multiplayerOptionDialog(viewModel::closeDialog,
+            { viewModel.openDialog(Dialog.JOIN_GAME) }, { viewModel.openDialog(Dialog.NEW_GAME) })
+
+        Dialog.HELP -> HelpDialog(viewModel::closeDialog, "Rules of the reversi")
         Dialog.MESSAGE -> MessageDialog(viewModel::closeDialog, viewModel.message)
-        Dialog.ABOUT -> AboutDialog(viewModel::closeDialog, "Rules of the reversi")
+        Dialog.ABOUT -> AboutDialog(viewModel::closeDialog)
         null -> Unit
     }
 
@@ -45,6 +53,30 @@ fun MessageDialog(onClose: () -> Unit, message: String) {
             }
         },
         confirmButton = { Button(modifier = Modifier, onClick = onClose) { Text("OK") } }
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun multiplayerOptionDialog(onClose: () -> Unit, onJoin: () -> Unit, onNew: () -> Unit) {
+
+    AlertDialog(
+        modifier = Modifier.size(boardSize * 0.4f).clip(RectangleShape),
+        onDismissRequest = onClose,
+        title = {
+            Text(
+                text = "Create or join a game",
+                style = MaterialTheme.typography.h5,
+                textAlign = TextAlign.Center,
+                fontFamily = FontFamily.Serif
+            )
+        },
+        buttons = {
+            Spacer(Modifier.size(20.dp))
+            Button(modifier = Modifier.padding(horizontal = 50.dp), onClick = { onNew() }) { Text("New Game") }
+            Button(modifier = Modifier.padding(horizontal = 50.dp), onClick = { onJoin() }) { Text("Join Game") }
+
+        }
     )
 }
 

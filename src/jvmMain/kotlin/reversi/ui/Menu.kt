@@ -24,7 +24,7 @@ fun FrameWindowScope.ReversiMenu(vm: ReversiViewModel, onExit: () -> Unit) = Men
             CheckboxItem("Auto-refresh", checked = vm.autoRefresh, onCheckedChange = { vm.toggleAutoRefresh() })
     }
     Menu("Help") {
-        Item("Rules", onClick = { vm.openDialog(Dialog.ABOUT) })
-        Item("About", onClick = { vm.openDialog(Dialog.HELP) })
+        Item("Rules", onClick = { vm.openDialog(Dialog.HELP) })
+        Item("About", onClick = { vm.openDialog(Dialog.ABOUT) })
     }
 }

@@ -10,21 +10,21 @@ import reversi.ui.ReversiInitialMenu
 @Composable
 fun FrameWindowScope.ReversiApp(onExit: () -> Unit, storage: BoardStorage) {
     val scope = rememberCoroutineScope()
-    val viewModel = remember { ReversiViewModel(scope, storage) } //The ViewModelffe
+    val viewModel = remember { ReversiViewModel(scope, storage) } //The ViewModel
     ReversiMenu(viewModel, onExit)              // The App menu.
     ReversiDialog(viewModel)        // The Dialogs.
-    ReversiInitialMenu(viewModel)
-    Column {
-        BoardView(
-            viewModel.game?.board,
-            viewModel.targetsOn,
-            viewModel::targets,
-            viewModel::toFlip,
-            onClick = viewModel::play,
-            onNewGame = viewModel::newGame
-        )
-        if (viewModel.game != null)
+    if (viewModel.inInitialState) ReversiInitialMenu(viewModel)   //The Initial Menu Window
+    else {
+        Column {
+            BoardView(
+                viewModel.game?.board,
+                viewModel.targetsOn,
+                viewModel::targets,
+                viewModel::toFlip,
+                onClick = viewModel::play,
+            )
             StatusBar(viewModel.status, viewModel.game?.board)
+        }
     }
 }
 

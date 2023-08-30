@@ -9,10 +9,10 @@ typealias BoardStorage = Storage<String, Board>
  * @property board the board of the game.
  * @constructor Creates a game with the given board and showTargets.
  * There are two possible states of game: [SinglePlayer] and [MultiPlayer].
- * These hierarchy is to be used by pattern matching.
+ * These hierarchies are to be used by pattern matching.
  */
 sealed class Game(val board: Board)
-class SinglePlayer(board: Board) : Game(board)
+class SinglePlayer(board: Board, val firstPlayer: Player) : Game(board)
 class MultiPlayer(board: Board, val player: Player, val id: String) : Game(board)
 
 /**
@@ -21,7 +21,7 @@ class MultiPlayer(board: Board, val player: Player, val id: String) : Game(board
  * Otherwise, a multiplayer game is created.
  */
 fun createGame(player: Player, id: String?, st: BoardStorage) =
-    if (id == null) SinglePlayer(createBoard(player))
+    if (id == null) SinglePlayer(createBoard(player), player)
     else MultiPlayer(createBoard(player), player, id).also {
         st.create(id, it.board)
     }
@@ -44,13 +44,12 @@ suspend fun joinGame(id: String, st: BoardStorage): Game {
 fun Game.play(cell: Cell, st: BoardStorage) =
     when (this) {
         is MultiPlayer -> {
-            if (board is BoardRun) {
+            if (board is BoardRun)
                 check(player == board.turn) { "Is not your turn" }
-            }
             MultiPlayer(board.play(cell), player, id).also { st.update(id, it.board) }
         }
 
-        is SinglePlayer -> SinglePlayer(board.play(cell))
+        is SinglePlayer -> SinglePlayer(board.play(cell), firstPlayer)
     }
 
 /**
@@ -79,5 +78,5 @@ suspend fun Game.refreshGame(st: BoardStorage, checked: Boolean = true): Game =
 fun Game.pass(st: BoardStorage): Game =
     when (this) {
         is MultiPlayer -> MultiPlayer(board.passOrRunBoard(), player, id).also { st.update(id, it.board) }
-        is SinglePlayer -> SinglePlayer(board.passOrRunBoard())
+        is SinglePlayer -> SinglePlayer(board.passOrRunBoard(), firstPlayer)
     }

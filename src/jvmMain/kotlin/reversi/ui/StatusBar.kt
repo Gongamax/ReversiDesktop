@@ -3,6 +3,7 @@ package pt.ise.tds.reversi.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +30,7 @@ fun PlayerView(
     currPlayer: Player,
     initialPlayer: Player?,
     score: Pair<Int, Int>? = Pair(0, 0),
+    thinking: Boolean,
     modifier: Modifier = Modifier
 ) =
     Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -37,7 +39,13 @@ fun PlayerView(
             turnBox(label, currPlayer, boxModifier)
         }
         Column(modifier = boxModifier) {
-            youBox(boxModifier, initialPlayer)
+            if (initialPlayer != null) youBox(boxModifier, initialPlayer)
+            if (thinking) {
+                Row {
+                    Text("Thinking  ", textAlign = TextAlign.Center, style = MaterialTheme.typography.h6)
+                    CircularProgressIndicator(modifier = Modifier.size(cellSize * 0.4f), color = Color.Black)
+                }
+            }
         }
         Column(modifier = Modifier, horizontalAlignment = Alignment.End) {
             scoreBox(boxModifier, score)
@@ -54,9 +62,9 @@ fun StatusBar(info: StatusInfo, board: Board?) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         val score = board?.getScore()
-        val (label, player, initialPlayer, refreshing) = info
+        val (label, player, initialPlayer, refreshing, thinking) = info
         if (player != null)
-            PlayerView(label, player, initialPlayer, score)
+            PlayerView(label, player, initialPlayer, score, thinking)
         else Column(
             modifier = mod,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -110,24 +118,23 @@ private fun scoreBox(boxModifier: Modifier, score: Pair<Int, Int>?) {
 }
 
 @Composable
-private fun youBox(boxModifier: Modifier, player: Player?) {
-    if (player != null) {
-        Box(modifier = boxModifier, contentAlignment = Alignment.Center) {
-            Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "You",
-                    fontSize = labelSize,
-                    textAlign = TextAlign.Start,
-                )
-                CellView(player, modifier = Modifier.size(barPiecesSize))
-            }
+private fun youBox(boxModifier: Modifier, player: Player) {
+    Box(modifier = boxModifier, contentAlignment = Alignment.Center) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "You",
+                fontSize = labelSize,
+                textAlign = TextAlign.Start,
+            )
+            CellView(player, modifier = Modifier.size(barPiecesSize))
         }
     }
 }
 
+
 @Composable
 private fun turnBox(label: String, player: Player, modifier: Modifier) {
-    Box(modifier = modifier,contentAlignment = Alignment.CenterStart) {
+    Box(modifier = modifier, contentAlignment = Alignment.CenterStart) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(label, fontSize = labelSize)
             CellView(player, modifier = Modifier.size(barPiecesSize), true)

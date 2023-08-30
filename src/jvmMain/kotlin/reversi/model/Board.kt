@@ -10,7 +10,7 @@ typealias Moves = Map<Cell, Player>
  * @property moves the map of the moves of the game.
  * @constructor Creates a board with the given [moves] that is map from [Cell] to [Player] ([Moves]).
  * There are four possible states of board: [BoardRun], [BoardWin], [BoardDraw] and [BoardPass].
- * These hierarchy is to be used by pattern matching.
+ * These hierarchies are to be used by pattern matching.
  */
 sealed class Board(val moves: Moves) {
     override fun equals(other: Any?): Boolean {
@@ -106,7 +106,7 @@ fun BoardRun.canPlay(cell: Cell): Boolean =
         if (cell + dir !in moves.keys || moves[cell + dir] == turn) false
         else cellsInDirection(cell, dir)
             .takeWhile { moves[it] != turn && moves[it] != null }
-            .all { moves[it] == turn.other() && moves[it + dir] != null }
+            .all { moves[it] == turn.other() && moves[it + dir] != null } && !moves.contains(cell) //Adição da condição AND por pensar ainda
     }
 
 /**
@@ -146,6 +146,21 @@ fun Board.passOrRunBoard(): Board {
     if (this is BoardPass) return getResult()
     if (this is BoardRun) return tryPass()
     else throw IllegalStateException("You cant pass, the game is not running")
+}
+
+
+fun BoardRun.getMoveValue(cell: Cell): Int {
+    if (!canPlay(cell))
+        throw IllegalStateException("Cannot evaluate this move")
+    val boardAfterPlay = play(cell)
+    val turnPoints = moves.count { it.value == turn }
+    val opponentPoints = boardAfterPlay.moves.count { it.value == turn.other() }
+    return opponentPoints - turnPoints - 1
+}
+
+fun Board.getDominatingSite(): Player {
+    val (black, white) = getScore()
+    return if (black > white) Player.BLACK else Player.WHITE
 }
 
 /**

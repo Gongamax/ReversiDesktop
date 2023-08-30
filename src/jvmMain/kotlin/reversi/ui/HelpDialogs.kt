@@ -87,18 +87,19 @@ fun GenericDialog(
 
 
 @Composable
-fun HelpDialog(onClose: () -> Unit) {
+fun AboutDialog(onClose: () -> Unit) {
     GenericDialog(
         onClose = onClose,
         title = "Reversi Game",
-        content = "ISEL\nTécnicas de Desenvolvimento de Software\n\nDeveloped by:\n\nDaniel Carvalho\nFrancisco Saraiva\n Gonçalo Frutuoso\n\n2022/2023",
+        content = "ISEL\nSoftware development Techniques\n"+ "\nInspired by the base project of this class"
+                + " that I developed with my mates and then evolved as a personal project.\n\n2022/2023",
         buttonText = "Ok",
         buttonAction = onClose
     )
 }
 
 @Composable
-fun AboutDialog(onClose: () -> Unit, title: String) {
+fun HelpDialog(onClose: () -> Unit, title: String) {
     val uriHandler = LocalUriHandler.current
     GenericDialog(
         onClose = onClose,
