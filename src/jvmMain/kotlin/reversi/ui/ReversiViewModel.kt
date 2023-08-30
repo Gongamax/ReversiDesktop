@@ -33,6 +33,15 @@ class ReversiViewModel(
             }
         }
 
+    private inline fun tryIgnore(block: () -> Unit) =
+        try {
+            block()
+        } catch (e: IllegalStateException) {
+            //Ignore message
+        } catch (e: IllegalArgumentException) {
+            //Ignore message
+        }
+
     var inInitialState by mutableStateOf<Boolean>(true)
         private set
 
@@ -63,7 +72,7 @@ class ReversiViewModel(
     //region Flip
     private var flipCells by mutableStateOf(emptySet<Cell>())
 
-    private fun cellsToFlip(prevBoard: Board, currBoard: Board) =
+    fun cellsToFlip(prevBoard: Board, currBoard: Board) =
         prevBoard.moves.filter { (cell, player) -> currBoard.moves[cell] != player }.keys
 
     fun toFlip(cell: Cell): Boolean = cell in flipCells
@@ -99,19 +108,16 @@ class ReversiViewModel(
     }
 
 
-    fun play(cell: Cell) = try {
+    fun play(cell: Cell) = tryIgnore {
         game?.let { g ->
             val b = g.board
-            if (g is SinglePlayer && b is BoardRun && g.firstPlayer != b.turn) return@let   //TODO: Melhorar condição
             game = g.play(cell, storage)
             flipCells = cellsToFlip(b, game?.board ?: b)
             autoRefreshLoop()
-            if (game is SinglePlayer) aiPlay(game) //Immediately calls the AI play if it's a single player game
+            val currGame = game
+            if (currGame is SinglePlayer && currGame.board is BoardRun) aiPlay(currGame) //Immediately calls the AI play
+        // if it's a single player game
         }
-    } catch (_: IllegalArgumentException) {
-        //Ignore play
-    } catch (_: IllegalStateException) {
-        //Ignore play
     }
 
     private fun aiPlay(currGame: Game?) {

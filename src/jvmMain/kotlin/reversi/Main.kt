@@ -12,6 +12,7 @@ import pt.isel.tds.reversi.storage.MongoStorage
 import pt.isel.tds.reversi.ui.ReversiApp
 import pt.isel.tds.storage.MongoDriver
 
+
 fun main() {
     MongoDriver().use { driver ->
         val storage: BoardStorage = MongoStorage("games", driver, BoardSerializer)
@@ -19,7 +20,7 @@ fun main() {
             val icon = painterResource("reversi.png")
             Window(
                 onCloseRequest = ::exitApplication,
-                title = "TDS Reversi",
+                title = "Reversi Game",
                 state = WindowState(size = DpSize.Unspecified),
                 icon = icon
             ) {

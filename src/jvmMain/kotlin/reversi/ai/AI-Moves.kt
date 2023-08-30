@@ -2,11 +2,11 @@ package reversi.ai
 
 import pt.isel.tds.reversi.model.*
 
-//Should be the easy/normal mode
+//Should be the EASY to Normal mode
 fun BoardRun.firstRandomMove() =
     Cell.values.shuffled().firstOrNull { canPlay(it) }
 
-//Should be the HARDER MODE
+//Should be the NORMAL MODE
 fun BoardRun.mostValuableAvailableMove() =
     Cell.values
         .filter { canPlay(it) }
