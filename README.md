@@ -73,6 +73,6 @@ This project is licensed under the [MIT License](LICENSE).
 ## Acknowledgments
 
 - Inspired by the classic Reversi (Othello) board game.
-- Thank you to my teammates [Daniel Carvalho](https://github.com/DanielMartinhoCarvalho) 
+- Thank you to my teammates [Daniel Carvalho](https://github.com/daniel-m-carvalho) 
 and [Francisco Saraiva](https://github.com/saraiva22) for their contributions and 
 support during the early stages of this project.
